@@ -1,33 +1,21 @@
-version: "3.9"
-services:
-  rallly_db:
-    image: postgres:14.2
-    restart: always
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+version: "3.7"
 
+services:
   rallly:
     build:
       context: .
+    container_name: rallly
     restart: always
-    depends_on:
-      rallly_db:
-        condition: service_healthy
-    ports:
-      - 3000:3000
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@rallly_db:5432/db
+    networks:
+      - tunnel
+      - db
     env_file:
       - .env
 
-volumes:
-  db-data:
-    driver: local
+networks:
+  tunnel:
+    external:
+      name: tunneled
+  db:
+    external:
+      name: db-net
